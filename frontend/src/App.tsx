@@ -2,13 +2,16 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import Navbar from "./components/Navbar";
-import AdminOrderHistory from "./pages/AdminOrderHistory";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import SweetList from "./pages/SweetList";
 import OrderHistory from "./pages/OrderHistory";
+import AdminOrderHistory from "./pages/AdminOrderHistory";
+
 import AddSweet from "./pages/admin/AddSweet";
+import EditSweet from "./pages/admin/EditSweet";
 
 export default function App() {
   return (
@@ -16,7 +19,14 @@ export default function App() {
       <Navbar />
 
       <Routes>
+        {/* Public */}
         <Route path="/" element={<h1 className="p-10">Home</h1>} />
+
+        {/* Authentication */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* USER PROTECTED ROUTES */}
         <Route
           path="/sweets"
           element={
@@ -25,6 +35,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/orders"
           element={
@@ -33,26 +44,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/admin/orders"
-          element={
-            <AdminRoute>
-              <OrderHistory />
-            </AdminRoute>
-          }
-        />
 
-        {/* Auth Pages */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-         <Route path="/admin/orders" element={<AdminOrderHistory />} />
-         <Route path="/admin/add-sweet" element={
-  <AdminRoute>
-    <AddSweet />
-  </AdminRoute>
-} />
-
-        {/* Protected - User Dashboard */}
         <Route
           path="/dashboard"
           element={
@@ -62,7 +54,7 @@ export default function App() {
           }
         />
 
-        {/* Admin */}
+        {/* ADMIN ROUTES */}
         <Route
           path="/admin"
           element={
@@ -72,6 +64,34 @@ export default function App() {
           }
         />
 
+        <Route
+          path="/admin/add-sweet"
+          element={
+            <AdminRoute>
+              <AddSweet />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/edit-sweet/:id"
+          element={
+            <AdminRoute>
+              <EditSweet />
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/orders"
+          element={
+            <AdminRoute>
+              <AdminOrderHistory />
+            </AdminRoute>
+          }
+        />
+
+        {/* NOT AUTHORIZED */}
         <Route path="/not-authorized" element={<h1>Not Authorized</h1>} />
       </Routes>
     </div>

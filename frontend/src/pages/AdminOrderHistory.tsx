@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function OrderHistory() {
+export default function AdminOrderHistory() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -10,7 +10,7 @@ export default function OrderHistory() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/orders", {
+        const res = await axios.get("http://localhost:3000/api/admin/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOrders(res.data.orders || []);
@@ -28,7 +28,7 @@ export default function OrderHistory() {
 
   return (
     <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">My Orders</h2>
+      <h2 className="text-2xl font-bold mb-4">All Orders (Admin)</h2>
 
       {orders.length === 0 ? (
         <p>No orders found.</p>
@@ -36,6 +36,7 @@ export default function OrderHistory() {
         <ul className="space-y-4">
           {orders.map((o: any) => (
             <li key={o.id} className="p-4 border rounded">
+              <p><strong>User ID:</strong> {o.userId}</p>
               <p><strong>Sweet:</strong> {o.sweet.name}</p>
               <p><strong>Quantity:</strong> {o.quantity}</p>
               <p><strong>Date:</strong> {new Date(o.createdAt).toLocaleString()}</p>
