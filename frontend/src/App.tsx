@@ -6,7 +6,7 @@ import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-
+import SweetList from "./pages/SweetList";
 
 export default function App() {
   return (
@@ -15,7 +15,14 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<h1 className="p-10">Home</h1>} />
-        
+        <Route
+          path="/sweets"
+          element={
+            <ProtectedRoute>
+              <SweetList />
+            </ProtectedRoute>
+          }
+        />
         {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
