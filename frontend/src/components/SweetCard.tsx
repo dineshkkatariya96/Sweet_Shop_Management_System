@@ -8,7 +8,7 @@ interface Sweet {
 
 interface Props {
   sweet: Sweet;
-  onBuy?: (id: number) => void;
+  onBuy: (sweet: Sweet) => void;
 }
 
 export default function SweetCard({ sweet, onBuy }: Props) {
@@ -20,16 +20,14 @@ export default function SweetCard({ sweet, onBuy }: Props) {
       <p className="mt-1 font-medium text-green-600">₹{sweet.price}</p>
       <p className="mt-1 text-sm">Stock: {sweet.quantity}</p>
 
-      {onBuy && (
-        <button
-          disabled={sweet.quantity === 0}
-          onClick={() => onBuy(sweet.id)}
-          className={`mt-4 w-full py-2 rounded text-white 
-            ${sweet.quantity === 0 ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
-        >
-          {sweet.quantity === 0 ? "Out of Stock" : "Buy"}
-        </button>
-      )}
+      <button
+        disabled={sweet.quantity === 0}
+        onClick={() => onBuy(sweet)}
+        className={`mt-4 w-full py-2 rounded text-white 
+          ${sweet.quantity === 0 ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}`}
+      >
+        {sweet.quantity === 0 ? "Out of Stock" : "Buy"}
+      </button>
     </div>
   );
 }

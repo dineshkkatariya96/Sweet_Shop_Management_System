@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import SweetCard from "../components/SweetCard";
+import PurchaseModal from "../components/PurchaseModal";
 
 interface Sweet {
   id: number;
@@ -16,6 +17,8 @@ export default function SweetList() {
   const [category, setCategory] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [selectedSweet, setSelectedSweet] = useState<Sweet | null>(null);
 
   const fetchSweets = async () => {
     const res = await api.get("/sweets", {
@@ -34,11 +37,30 @@ export default function SweetList() {
     fetchSweets();
   }, [search, category, page]);
 
+  const handleBuy = async (sweet: Sweet) => {
+    setSelectedSweet(sweet);
+  };
+
+  const confirmPurchase = async (qty: number) => {
+    if (!selectedSweet) return;
+
+    try {
+      await api.post(`/purchase/${selectedSweet.id}`, { quantity: qty });
+
+      alert("Purchase successful!");
+
+      setSelectedSweet(null);
+      fetchSweets(); // refresh after purchase
+    } catch (err: any) {
+      alert(err.response?.data?.error || "Error purchasing");
+    }
+  };
+
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">Sweets 🍬</h1>
 
-      {/* Filters Section */}
+      {/* Filters */}
       <div className="flex gap-4 mb-6">
         <input
           placeholder="Search sweets..."
@@ -59,10 +81,10 @@ export default function SweetList() {
         </select>
       </div>
 
-      {/* List */}
+      {/* Sweet List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {sweets.map((sweet) => (
-          <SweetCard key={sweet.id} sweet={sweet} />
+          <SweetCard key={sweet.id} sweet={sweet} onBuy={handleBuy} />
         ))}
       </div>
 
@@ -70,7 +92,7 @@ export default function SweetList() {
       <div className="flex justify-center mt-8 gap-3">
         <button
           disabled={page === 1}
-          onClick={() => setPage((p) => p - 1)}
+          onClick={() => setPage(page - 1)}
           className={`px-4 py-2 rounded ${page === 1 ? "bg-gray-300" : "bg-blue-600 text-white"}`}
         >
           Prev
@@ -80,12 +102,21 @@ export default function SweetList() {
 
         <button
           disabled={page === totalPages}
-          onClick={() => setPage((p) => p + 1)}
+          onClick={() => setPage(page + 1)}
           className={`px-4 py-2 rounded ${page === totalPages ? "bg-gray-300" : "bg-blue-600 text-white"}`}
         >
           Next
         </button>
       </div>
+
+      {/* Purchase Modal */}
+      {selectedSweet && (
+        <PurchaseModal
+          sweetName={selectedSweet.name}
+          onConfirm={confirmPurchase}
+          onCancel={() => setSelectedSweet(null)}
+        />
+      )}
     </div>
   );
 }
