@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 export default function App() {
   return (
@@ -8,26 +10,26 @@ export default function App() {
       <Routes>
         <Route path="/" element={<h1 className="p-10">Home</h1>} />
 
-        {/* Auth pages */}
-        <Route path="/login" element={<h1>Login Page</h1>} />
-        <Route path="/register" element={<h1>Register Page</h1>} />
+        {/* Auth Pages */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        {/* Protected pages */}
+        {/* Protected Pages */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <h1>User Dashboard</h1>
+              <h1 className="p-10">User Dashboard</h1>
             </ProtectedRoute>
           }
         />
 
-        {/* Admin only */}
+        {/* Admin Only */}
         <Route
           path="/admin"
           element={
             <AdminRoute>
-              <h1>Admin Panel</h1>
+              <h1 className="p-10">Admin Panel</h1>
             </AdminRoute>
           }
         />
