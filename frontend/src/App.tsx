@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="min-h-screen bg-gray-50">
+      <Routes>
+        <Route path="/" element={<h1 className="p-10">Home</h1>} />
 
-export default App
+        {/* Auth pages */}
+        <Route path="/login" element={<h1>Login Page</h1>} />
+        <Route path="/register" element={<h1>Register Page</h1>} />
+
+        {/* Protected pages */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <h1>User Dashboard</h1>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin only */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <h1>Admin Panel</h1>
+            </AdminRoute>
+          }
+        />
+
+        <Route path="/not-authorized" element={<h1>Not Authorized</h1>} />
+      </Routes>
+    </div>
+  );
+}
