@@ -12,6 +12,7 @@ import AdminOrderHistory from "./pages/AdminOrderHistory";
 
 import AddSweet from "./pages/admin/AddSweet";
 import EditSweet from "./pages/admin/EditSweet";
+import RestockSweet from "./pages/admin/RestockSweet";
 
 export default function App() {
   return (
@@ -44,6 +45,14 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+  path="/admin/restock/:id"
+  element={
+    <AdminRoute>
+      <RestockSweet />
+    </AdminRoute>
+  }
+/>
 
         <Route
           path="/dashboard"
