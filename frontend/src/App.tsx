@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import SweetList from "./pages/SweetList";
 import OrderHistory from "./pages/OrderHistory";
+import AddSweet from "./pages/admin/AddSweet";
 
 export default function App() {
   return (
@@ -45,7 +46,12 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
          <Route path="/admin/orders" element={<AdminOrderHistory />} />
-         
+         <Route path="/admin/add-sweet" element={
+  <AdminRoute>
+    <AddSweet />
+  </AdminRoute>
+} />
+
         {/* Protected - User Dashboard */}
         <Route
           path="/dashboard"
