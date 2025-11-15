@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import Navbar from "./components/Navbar";
-
+import AdminOrderHistory from "./pages/AdminOrderHistory";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -44,7 +44,8 @@ export default function App() {
         {/* Auth Pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+         <Route path="/admin/orders" element={<AdminOrderHistory />} />
+         
         {/* Protected - User Dashboard */}
         <Route
           path="/dashboard"
