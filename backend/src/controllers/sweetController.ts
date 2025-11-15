@@ -1,20 +1,17 @@
-import { PrismaClient } from "@prisma/client";
+import { reduceSweetStock } from "../services/sweetService";
 
-const prisma = new PrismaClient();
+export const purchaseSweetController = async (req: any, res: any) => {
+  const sweetId = Number(req.params.id);
+  const { quantity } = req.body;
 
-export const purchaseSweet = async (sweetId: number, quantity: number) => {
-  const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
+  try {
+    const updated = await reduceSweetStock(sweetId, quantity);
+    return res.status(200).json({ updated });
+  } catch (error: any) {
+    if (error.message === "Insufficient stock") {
+      return res.status(400).json({ error: error.message });
+    }
 
-  if (!sweet) throw new Error("Sweet not found");
-
-  if (sweet.quantity < quantity) {
-    throw new Error("Insufficient stock");
+    return res.status(404).json({ error: error.message });
   }
-
-  const updated = await prisma.sweet.update({
-    where: { id: sweetId },
-    data: { quantity: sweet.quantity - quantity }
-  });
-
-  return updated;
 };
