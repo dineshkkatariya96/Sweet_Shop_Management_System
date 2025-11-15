@@ -1,122 +1,69 @@
 import { useEffect, useState } from "react";
-import api from "../services/api";
-import SweetCard from "../components/SweetCard";
-import PurchaseModal from "../components/PurchaseModal";
+import axios from "axios";
 
-interface Sweet {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  quantity: number;
-}
-
-export default function SweetList() {
-  const [sweets, setSweets] = useState<Sweet[]>([]);
+export default function SweetsList() {
+  const [sweets, setSweets] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  const [selectedSweet, setSelectedSweet] = useState<Sweet | null>(null);
 
   const fetchSweets = async () => {
-    const res = await api.get("/sweets", {
-      params: {
-        search,
-        category,
-        page,
-      },
-    });
-
-    setSweets(res.data.sweets);
-    setTotalPages(res.data.totalPages || 1);
+    try {
+      const res = await axios.get(
+        `http://localhost:3000/api/sweets?search=${search}`
+      );
+      setSweets(res.data.sweets);
+    } catch (err) {
+      console.error("Error fetching sweets:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
     fetchSweets();
-  }, [search, category, page]);
-
-  const handleBuy = async (sweet: Sweet) => {
-    setSelectedSweet(sweet);
-  };
-
-  const confirmPurchase = async (qty: number) => {
-    if (!selectedSweet) return;
-
-    try {
-      await api.post(`/purchase/${selectedSweet.id}`, { quantity: qty });
-
-      alert("Purchase successful!");
-
-      setSelectedSweet(null);
-      fetchSweets(); // refresh after purchase
-    } catch (err: any) {
-      alert(err.response?.data?.error || "Error purchasing");
-    }
-  };
+  }, [search]);
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Sweets 🍬</h1>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-pink-100 p-6">
+      <div className="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-md">
 
-      {/* Filters */}
-      <div className="flex gap-4 mb-6">
+        <h1 className="text-3xl font-bold text-center text-pink-700 mb-4">
+          🍬 Sweets Collection
+        </h1>
+
+        {/* Search */}
         <input
+          type="text"
           placeholder="Search sweets..."
+          className="w-full px-4 py-2 mb-4 rounded-lg border"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 border rounded w-1/3"
         />
 
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="px-4 py-2 border rounded"
-        >
-          <option value="">All Categories</option>
-          <option value="Milk">Milk</option>
-          <option value="Dry Fruit">Dry Fruit</option>
-          <option value="Sugar">Sugar</option>
-        </select>
+        {loading ? (
+          <p className="text-center text-gray-700">Loading sweets...</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {sweets.map((sweet) => (
+              <div
+                key={sweet.id}
+                className="bg-white shadow-lg rounded-xl p-5 border hover:shadow-xl transition"
+              >
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {sweet.name}
+                </h3>
+                <p className="text-gray-600 mt-1">Category: {sweet.category}</p>
+                <p className="text-gray-900 font-bold mt-2">₹{sweet.price}</p>
+                <p className="text-gray-600">Stock: {sweet.quantity}</p>
+
+                <button className="mt-4 w-full py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700">
+                  Buy Now
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {/* Sweet List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sweets.map((sweet) => (
-          <SweetCard key={sweet.id} sweet={sweet} onBuy={handleBuy} />
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <div className="flex justify-center mt-8 gap-3">
-        <button
-          disabled={page === 1}
-          onClick={() => setPage(page - 1)}
-          className={`px-4 py-2 rounded ${page === 1 ? "bg-gray-300" : "bg-blue-600 text-white"}`}
-        >
-          Prev
-        </button>
-
-        <span className="px-3 py-2">Page {page} / {totalPages}</span>
-
-        <button
-          disabled={page === totalPages}
-          onClick={() => setPage(page + 1)}
-          className={`px-4 py-2 rounded ${page === totalPages ? "bg-gray-300" : "bg-blue-600 text-white"}`}
-        >
-          Next
-        </button>
-      </div>
-
-      {/* Purchase Modal */}
-      {selectedSweet && (
-        <PurchaseModal
-          sweetName={selectedSweet.name}
-          onConfirm={confirmPurchase}
-          onCancel={() => setSelectedSweet(null)}
-        />
-      )}
     </div>
   );
 }
