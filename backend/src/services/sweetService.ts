@@ -22,3 +22,27 @@ export const reduceSweetStock = async (sweetId: number, quantity: number) => {
 
   return updated;
 };
+
+// 🟩 NEW — minimal update functionality
+export const updateSweet = async (
+  sweetId: number,
+  data: {
+    name?: string;
+    category?: string;
+    price?: number;
+    quantity?: number;
+  }
+) => {
+  const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
+
+  if (!sweet) {
+    throw new Error("Sweet not found");
+  }
+
+  const updated = await prisma.sweet.update({
+    where: { id: sweetId },
+    data
+  });
+
+  return updated;
+};
