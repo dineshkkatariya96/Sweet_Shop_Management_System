@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-import { signToken } from "../utils/jwt.js";
+import { signToken } from "../utils/jwt";
 
 const router = Router();
 const prisma = new PrismaClient();
