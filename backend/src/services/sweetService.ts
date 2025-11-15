@@ -94,3 +94,15 @@ export const listSweets = async ({
 
   return sweets;
 };
+
+export const getSweetById = async (sweetId: number) => {
+  const sweet = await prisma.sweet.findUnique({
+    where: { id: sweetId }
+  });
+
+  if (!sweet) {
+    throw new Error("Sweet not found");
+  }
+
+  return sweet;
+};
