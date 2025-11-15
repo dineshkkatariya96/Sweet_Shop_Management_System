@@ -59,3 +59,38 @@ export const deleteSweet = async (sweetId: number) => {
 
   return true;
 };
+
+export const listSweets = async ({
+  category,
+  search,
+  page = 1,
+  limit = 10,
+}: {
+  category?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}) => {
+  const where: any = {};
+
+  if (category && category.trim() !== "") {
+    where.category = category;
+  }
+
+  // FIXED for SQLite — remove mode: "insensitive"
+  if (search && search.trim() !== "") {
+    where.name = {
+      contains: search,
+    };
+  }
+
+  const skip = (page - 1) * limit;
+
+  const sweets = await prisma.sweet.findMany({
+    where,
+    skip,
+    take: limit,
+  });
+
+  return sweets;
+};
