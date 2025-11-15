@@ -1,15 +1,24 @@
 import { Request, Response } from "express";
-import { reduceSweetStock, updateSweet } from "../services/sweetService";
+import { reduceSweetStock, updateSweet ,createOrder} from "../services/sweetService";
 import { deleteSweet } from "../services/sweetService";
 import { listSweets } from "../services/sweetService";
 import { getSweetById } from "../services/sweetService";
+import jwt from "jsonwebtoken";
 
-export const purchaseSweetController = async (req: Request, res: Response) => {
+export const purchaseSweetController = async (req: any, res: any) => {
   const sweetId = Number(req.params.id);
   const { quantity } = req.body;
 
   try {
+    // decode user from token
+    const token = req.headers.authorization?.split(" ")[1];
+    const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "secret");
+
     const updated = await reduceSweetStock(sweetId, quantity);
+
+    // GREEN: Create order
+    await createOrder(decoded.userId, sweetId, quantity);
+
     return res.status(200).json({ updated });
   } catch (error: any) {
     if (error.message === "Insufficient stock") {
@@ -21,18 +30,16 @@ export const purchaseSweetController = async (req: Request, res: Response) => {
 
 // 🟩 NEW — minimal update controller
 export const updateSweetController = async (req: Request, res: Response) => {
-  const sweetId = Number(req.params.id);
-  const data = req.body;
-
   try {
-    const updated = await updateSweet(sweetId, data);
+    const sweetId = Number(req.params.id);
+
+    const updated = await updateSweet(sweetId, req.body);
+
     return res.status(200).json({ sweet: updated });
   } catch (error: any) {
-    return res.status(404).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
-
-
 // GREEN — minimal delete controller
 export const deleteSweetController = async (req: any, res: any) => {
   const sweetId = Number(req.params.id);
@@ -74,3 +81,4 @@ export const getSweetController = async (req: any, res: any) => {
     return res.status(404).json({ error: error.message });
   }
 };
+

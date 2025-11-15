@@ -23,9 +23,9 @@ export const reduceSweetStock = async (sweetId: number, quantity: number) => {
   return updated;
 };
 
-// 🟩 NEW — minimal update functionality
+// UPDATE SWEET (ADMIN)
 export const updateSweet = async (
-  sweetId: number,
+  id: number,
   data: {
     name?: string;
     category?: string;
@@ -33,20 +33,28 @@ export const updateSweet = async (
     quantity?: number;
   }
 ) => {
-  const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
+  // Validation
+  if (data.price !== undefined && data.price <= 0) {
+    throw new Error("Price must be greater than 0");
+  }
 
+  if (data.quantity !== undefined && data.quantity < 0) {
+    throw new Error("Quantity cannot be negative");
+  }
+
+  // Ensure sweet exists
+  const sweet = await prisma.sweet.findUnique({ where: { id } });
   if (!sweet) {
     throw new Error("Sweet not found");
   }
 
   const updated = await prisma.sweet.update({
-    where: { id: sweetId },
+    where: { id },
     data
   });
 
   return updated;
 };
-
 
 export const deleteSweet = async (sweetId: number) => {
   const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
@@ -106,3 +114,14 @@ export const getSweetById = async (sweetId: number) => {
 
   return sweet;
 };
+
+export const createOrder = async (userId: number, sweetId: number, quantity: number) => {
+  return prisma.order.create({
+    data: {
+      userId,
+      sweetId,
+      quantity,
+    },
+  });
+};
+

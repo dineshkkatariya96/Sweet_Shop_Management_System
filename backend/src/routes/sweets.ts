@@ -17,5 +17,6 @@ router.post("/", adminOnly, createSweetController);
 router.put("/:id", adminOnly, updateSweetController);
 router.delete("/:id", adminOnly, deleteSweetController);
 router.post("/:id/purchase", purchaseSweetController);
+router.put("/:id", adminOnly, updateSweetController);
 
 export default router;
