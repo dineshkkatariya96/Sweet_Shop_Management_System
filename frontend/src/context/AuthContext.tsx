@@ -1,63 +1,62 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import api from "../services/api";
+import { createContext, useContext, useState, useEffect } from "react";
 
 interface User {
   id: number;
   email: string;
-  role: "USER" | "ADMIN";
+  role: "ADMIN" | "USER";
 }
 
 interface AuthContextType {
   user: User | null;
-  loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
-  logout: () => void;
   isAdmin: boolean;
+  setUser: (u: User | null) => void;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAdmin: false,
+  setUser: () => {},
+  logout: () => {},
+});
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+export const AuthProvider = ({ children }: any) => {
+  const [user, setUserState] = useState<User | null>(null);
 
-  // Load user from localStorage on refresh
+  // Restore user from JWT
   useEffect(() => {
-    const saved = localStorage.getItem("user");
-    if (saved) setUser(JSON.parse(saved));
-    setLoading(false);
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+
+    if (token && userData) {
+      try {
+        setUserState(JSON.parse(userData));
+      } catch {}
+    }
   }, []);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post("/auth/login", { email, password });
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    setUser(res.data.user);
-  };
-
-  const register = async (email: string, password: string) => {
-    const res = await api.post("/auth/register", { email, password });
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    setUser(res.data.user);
+  const setUser = (u: User | null) => {
+    setUserState(u);
+    if (u) {
+      localStorage.setItem("user", JSON.stringify(u));
+    } else {
+      localStorage.removeItem("user");
+    }
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    setUser(null);
+    setUserState(null);
   };
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        loading,
-        login,
-        register,
-        logout,
         isAdmin: user?.role === "ADMIN",
+        setUser,
+        logout,
       }}
     >
       {children}
@@ -65,4 +64,4 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-export const useAuth = () => useContext(AuthContext)!;
+export const useAuth = () => useContext(AuthContext);
