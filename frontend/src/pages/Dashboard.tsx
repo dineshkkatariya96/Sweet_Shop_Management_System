@@ -17,8 +17,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 p-6">
       <div className="max-w-4xl mx-auto bg-white/90 shadow-xl backdrop-blur-md rounded-2xl p-10 border border-white/20">
-        
-        {/* Header */}
+
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide">
             Welcome, {user.email.split("@")[0]} 👋
@@ -28,10 +27,8 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Menu */}
         <div className="grid md:grid-cols-2 gap-6">
-          
-          {/* View sweets */}
+
           <button
             onClick={() => navigate("/sweets")}
             className="p-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-md text-center text-lg font-semibold transition-all"
@@ -39,7 +36,6 @@ export default function Dashboard() {
             🍬 View All Sweets
           </button>
 
-          {/* User orders */}
           {!isAdmin && (
             <button
               onClick={() => navigate("/orders")}
@@ -49,7 +45,6 @@ export default function Dashboard() {
             </button>
           )}
 
-          {/* Admin: Add sweet */}
           {isAdmin && (
             <button
               onClick={() => navigate("/admin/add-sweet")}
@@ -59,7 +54,6 @@ export default function Dashboard() {
             </button>
           )}
 
-          {/* Admin: View all orders */}
           {isAdmin && (
             <button
               onClick={() => navigate("/admin/orders")}
@@ -68,19 +62,8 @@ export default function Dashboard() {
               📦 View All Orders
             </button>
           )}
-
-          {/* Admin: Manage sweets */}
-          {isAdmin && (
-            <button
-              onClick={() => navigate("/admin/manage-sweets")}
-              className="p-6 bg-red-500 hover:bg-red-600 text-white rounded-xl shadow-md text-center text-lg font-semibold transition-all"
-            >
-              🛠 Manage Sweets
-            </button>
-          )}
         </div>
 
-        {/* Logout */}
         <div className="mt-10 text-center">
           <button
             onClick={() => {
