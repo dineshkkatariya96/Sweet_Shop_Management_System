@@ -46,3 +46,16 @@ export const updateSweet = async (
 
   return updated;
 };
+
+
+export const deleteSweet = async (sweetId: number) => {
+  const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
+
+  if (!sweet) {
+    throw new Error("Sweet not found");
+  }
+
+  await prisma.sweet.delete({ where: { id: sweetId } });
+
+  return true;
+};
