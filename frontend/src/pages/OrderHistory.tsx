@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { ClipboardDocumentListIcon } from "@heroicons/react/24/outline";
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -24,25 +25,74 @@ export default function OrderHistory() {
     fetchOrders();
   }, []);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex justify-center items-center text-xl font-semibold">
+        Loading your orders...
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">My Orders</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 p-8 flex justify-center">
+      <div
+        className="
+          w-full max-w-3xl 
+          bg-white/70 backdrop-blur-xl 
+          shadow-2xl rounded-3xl 
+          border border-white/40 
+          p-10
+        "
+      >
+        {/* Header */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <ClipboardDocumentListIcon className="h-10 w-10 text-purple-600" />
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide">
+            My Orders
+          </h1>
+        </div>
 
-      {orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {orders.map((o: any) => (
-            <li key={o.id} className="p-4 border rounded">
-              <p><strong>Sweet:</strong> {o.sweet.name}</p>
-              <p><strong>Quantity:</strong> {o.quantity}</p>
-              <p><strong>Date:</strong> {new Date(o.createdAt).toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+        {/* No orders */}
+        {orders.length === 0 ? (
+          <div className="text-center text-gray-600 text-lg bg-white/60 p-8 rounded-xl shadow-inner">
+            You haven't placed any orders yet 🍬
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {orders.map((o: any) => (
+              <div
+                key={o.id}
+                className="
+                  bg-white p-6 rounded-xl 
+                  shadow-md hover:shadow-xl transition-all 
+                  border border-gray-200
+                "
+              >
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  {o.sweet.name}
+                </h2>
+
+                <p className="text-gray-700">
+                  <strong>Quantity:</strong>{" "}
+                  <span className="font-semibold">{o.quantity}</span>
+                </p>
+
+                <p className="text-gray-700 mt-1">
+                  <strong>Ordered On:</strong>{" "}
+                  <span className="font-semibold">
+                    {new Date(o.createdAt).toLocaleString()}
+                  </span>
+                </p>
+
+                <div className="mt-4 flex justify-end">
+                  <span className="px-4 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">
+                    Order #{o.id}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

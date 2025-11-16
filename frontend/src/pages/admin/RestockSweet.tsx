@@ -49,7 +49,7 @@ export default function RestockSweet() {
       </form>
 
       <button
-        onClick={() => navigate("/admin/dashboard")}
+        onClick={() => navigate("/dashboard")}
         className="w-full mt-6 py-2 bg-gray-700 text-white rounded-lg"
       >
         ⬅ Back to Dashboard

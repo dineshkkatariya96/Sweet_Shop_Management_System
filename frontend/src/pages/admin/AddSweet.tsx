@@ -129,7 +129,7 @@ export default function AddSweet() {
         </form>
 
         <button
-          onClick={() => navigate("/admin/dashboard")}
+          onClick={() => navigate("/dashboard")}
           className="w-full mt-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-black transition-all"
         >
           ⬅ Back to Dashboard

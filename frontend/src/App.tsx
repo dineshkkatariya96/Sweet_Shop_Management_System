@@ -21,7 +21,7 @@ export default function App() {
 
       <Routes>
         {/* Public */}
-        <Route path="/" element={<h1 className="p-10">Home</h1>} />
+        <Route path="/" element={<Login />} />
 
         {/* Authentication */}
         <Route path="/login" element={<Login />} />

@@ -25,7 +25,7 @@ export default function SweetList() {
 
   const isAdmin = user?.role === "ADMIN";
 
-  // Fetch sweets (with optional search + category filters)
+  // Fetch sweets API
   const fetchSweets = async () => {
     try {
       const query = new URLSearchParams();
@@ -36,7 +36,12 @@ export default function SweetList() {
         `http://localhost:3000/api/sweets?${query.toString()}`
       );
 
-      setSweets(res.data.sweets || res.data);
+      const mapped = res.data.sweets.map((s: any) => ({
+        ...s,
+        stock: s.stock ?? s.quantity,
+      }));
+
+      setSweets(mapped);
     } catch (err) {
       console.error(err);
       setError("Failed to load sweets");
@@ -54,7 +59,7 @@ export default function SweetList() {
     fetchSweets();
   };
 
-  // BUY sweet (Customer)
+  // BUY SWEET
   const handleBuy = async (sweetId: number) => {
     try {
       await axios.post(
@@ -63,60 +68,60 @@ export default function SweetList() {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      alert("Purchase successful!");
+      alert("Purchase Successful!");
       fetchSweets();
     } catch (err: any) {
-      console.error(err);
       alert(err.response?.data?.error || "Purchase failed.");
     }
   };
 
-  // DELETE sweet (Admin)
+  // DELETE SWEET
   const handleDelete = async (sweetId: number) => {
-    if (!confirm("Are you sure you want to delete this sweet?")) return;
+    if (!confirm("Are you sure?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/api/sweets/${sweetId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.delete(
+        `http://localhost:3000/api/sweets/${sweetId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
-      alert("Sweet deleted!");
+      alert("Sweet Deleted!");
       fetchSweets();
     } catch (err: any) {
-      alert(err.response?.data?.error || "Cannot delete sweet.");
+      alert(err.response?.data?.error || "Delete failed.");
     }
   };
 
-  if (loading) {
+  if (loading)
     return (
       <div className="min-h-screen flex justify-center items-center text-xl">
         Loading sweets...
       </div>
     );
-  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-200 via-purple-200 to-blue-200 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#fce1ff] via-[#e0d7ff] to-[#c5e1ff] p-10">
 
-      <h1 className="text-4xl font-extrabold text-center mb-10 text-gray-800">
-        🍬 Sweet Collections
+      {/* Heading */}
+      <h1 className="text-5xl font-extrabold text-center mb-12 text-gray-900 tracking-wide drop-shadow-lg">
+        🍬 Our Delicious Sweet Collection
       </h1>
 
-      {/* Search + Filter Section */}
+      {/* Search / Filter */}
       <form
         onSubmit={handleSearch}
-        className="flex flex-col sm:flex-row gap-4 justify-center mb-10"
+        className="flex flex-col sm:flex-row justify-center gap-4 mb-12"
       >
         <input
           type="text"
           placeholder="Search sweets..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 w-full sm:w-72 rounded-lg border"
+          className="px-5 py-3 w-full sm:w-80 rounded-2xl bg-white shadow-md border border-gray-200 focus:ring-2 focus:ring-purple-500 outline-none"
         />
 
         <select
-          className="px-4 py-2 rounded-lg border"
+          className="px-4 py-3 rounded-2xl bg-white border shadow-md focus:ring-2 focus:ring-purple-500"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -126,79 +131,95 @@ export default function SweetList() {
           <option value="Sugar-free">Sugar-free</option>
         </select>
 
-        <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg">
-          Search
+        <button
+          className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl shadow-md font-semibold transition"
+        >
+          🔍 Search
         </button>
       </form>
 
-      {/* Error message */}
+      {/* Error */}
       {error && (
-        <p className="text-center text-red-600 font-semibold mb-4">{error}</p>
+        <p className="text-center text-red-600 font-semibold mb-6">{error}</p>
       )}
 
-      {/* Sweet Cards Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* SWEET CARDS */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
         {sweets.map((sweet) => (
           <div
             key={sweet.id}
-            className="bg-white p-6 rounded-2xl shadow-xl border border-gray-200 hover:shadow-2xl transition-all"
+            className="
+              bg-white/70 backdrop-blur-md
+              border border-white/50
+              p-7 rounded-3xl shadow-xl 
+              hover:shadow-3xl transition-all 
+              hover:-translate-y-1
+            "
           >
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            <h2 className="text-2xl font-bold text-gray-800 mb-3">
               {sweet.name}
             </h2>
 
-            <p className="text-gray-700 mb-2">
-              <strong>Category:</strong> {sweet.category}
-            </p>
+            <div className="space-y-1 text-gray-700">
+              <p><strong>Category:</strong> {sweet.category}</p>
+              <p><strong>Price:</strong> ₹{sweet.price}</p>
+              <p>
+                <strong>Stock Left:</strong>{" "}
+                <span
+                  className={
+                    sweet.stock === 0
+                      ? "text-red-600 font-bold"
+                      : "text-green-700 font-semibold"
+                  }
+                >
+                  {sweet.stock}
+                </span>
+              </p>
+            </div>
 
-            <p className="text-gray-700 mb-2">
-              <strong>Price:</strong> ₹{sweet.price}
-            </p>
-
-            <p className="text-gray-700 mb-4">
-              <strong>Stock:</strong> {sweet.stock}
-            </p>
-
-            {/* CUSTOMER BUY BUTTON */}
+            {/* BUY BUTTON - CUSTOMER */}
             {!isAdmin && sweet.stock > 0 && (
               <button
                 onClick={() => handleBuy(sweet.id)}
-                className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow"
+                className="
+                  w-full mt-5 py-3 
+                  bg-green-600 hover:bg-green-700 
+                  text-white font-semibold 
+                  rounded-xl shadow transition
+                "
               >
-                Buy Now
+                🛒 Buy Now
               </button>
             )}
 
-            {/* Out of stock */}
             {!isAdmin && sweet.stock === 0 && (
-              <p className="text-red-600 font-semibold text-center">
-                Out of Stock
+              <p className="text-center mt-5 text-red-600 font-semibold">
+                ❌ Out of Stock
               </p>
             )}
 
             {/* ADMIN BUTTONS */}
             {isAdmin && (
-              <div className="flex flex-col gap-3 mt-4">
-
+              <div className="flex flex-col gap-3 mt-6">
                 <button
                   onClick={() => navigate(`/admin/edit-sweet/${sweet.id}`)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow"
                 >
-                  Edit
+                  ✏️ Edit
                 </button>
 
                 <button
                   onClick={() => navigate(`/admin/restock/${sweet.id}`)}
-                  className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg"
+                  className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl shadow"
                 >
-                  Restock
+                  📦 Restock
                 </button>
 
                 <button
                   onClick={() => handleDelete(sweet.id)}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow"
                 >
-                  Delete
+                  ❌ Delete
                 </button>
               </div>
             )}
@@ -206,11 +227,15 @@ export default function SweetList() {
         ))}
       </div>
 
-      {/* Back Button */}
-      <div className="text-center mt-10">
+      {/* Back button */}
+      <div className="text-center mt-12">
         <button
           onClick={() => navigate("/dashboard")}
-          className="px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-black transition-all shadow"
+          className="
+            px-8 py-3 rounded-xl 
+            bg-gray-900 text-white 
+            hover:bg-black transition shadow-lg
+          "
         >
           ⬅ Back to Dashboard
         </button>

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { ClipboardDocumentListIcon, UserIcon, CakeIcon } from "@heroicons/react/24/outline";
 
 export default function AdminOrderHistory() {
   const [orders, setOrders] = useState([]);
@@ -24,26 +25,87 @@ export default function AdminOrderHistory() {
     fetchOrders();
   }, []);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (loading)
+    return (
+      <div className="min-h-screen flex justify-center items-center text-xl font-semibold">
+        Loading admin orders...
+      </div>
+    );
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold mb-4">All Orders (Admin)</h2>
+    <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-orange-100 to-pink-100 p-10 flex justify-center">
+      <div
+        className="
+          w-full max-w-4xl 
+          bg-white/70 backdrop-blur-xl 
+          shadow-2xl rounded-3xl 
+          border border-white/40 
+          p-10
+        "
+      >
+        {/* Header */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <ClipboardDocumentListIcon className="h-10 w-10 text-orange-600" />
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide">
+            Admin — All Orders
+          </h1>
+        </div>
 
-      {orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        <ul className="space-y-4">
-          {orders.map((o: any) => (
-            <li key={o.id} className="p-4 border rounded">
-              <p><strong>User ID:</strong> {o.userId}</p>
-              <p><strong>Sweet:</strong> {o.sweet.name}</p>
-              <p><strong>Quantity:</strong> {o.quantity}</p>
-              <p><strong>Date:</strong> {new Date(o.createdAt).toLocaleString()}</p>
-            </li>
-          ))}
-        </ul>
-      )}
+        {/* No Orders */}
+        {orders.length === 0 ? (
+          <div className="text-center text-gray-600 text-lg bg-white/60 p-8 rounded-xl shadow-inner">
+            No orders placed yet 📭
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {orders.map((o: any) => (
+              <div
+                key={o.id}
+                className="
+                  bg-white p-6 rounded-xl 
+                  shadow-md hover:shadow-xl transition-all 
+                  border border-gray-200
+                "
+              >
+                <div className="flex justify-between items-center">
+                  {/* Left side */}
+                  <div>
+                    <p className="text-gray-900 text-lg font-bold flex items-center gap-2">
+                      <CakeIcon className="h-5 w-5 text-pink-600" />
+                      {o.sweet.name}
+                    </p>
+
+                    <p className="mt-1 text-gray-700">
+                      <strong>Quantity:</strong>{" "}
+                      <span className="font-semibold">{o.quantity}</span>
+                    </p>
+
+                    <p className="mt-1 text-gray-700">
+                      <strong>Date:</strong>{" "}
+                      <span className="font-semibold">
+                        {new Date(o.createdAt).toLocaleString()}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Right side */}
+                  <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow">
+                    <UserIcon className="h-5 w-5" />
+                    User #{o.userId}
+                  </div>
+                </div>
+
+                {/* Order Number */}
+                <div className="mt-4 flex justify-end">
+                  <span className="px-4 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                    Order #{o.id}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
