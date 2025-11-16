@@ -69,7 +69,7 @@ export default function AdminDashboard() {
         <h1 className="text-3xl font-bold">Admin Dashboard</h1>
 
         <Link
-          to="/admin/sweets/new"
+          to="/admin/add-sweet"
           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
         >
           + Add Sweet
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
 
               <div className="flex flex-col gap-2 mt-4">
                 <Link
-                  to={`/admin/sweets/${s.id}/edit`}
+                  to={`/admin/edit-sweet/${s.id}`}
                   className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 text-center"
                 >
                   Edit
