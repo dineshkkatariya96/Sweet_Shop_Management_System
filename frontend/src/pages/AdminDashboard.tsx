@@ -2,14 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
-
-interface Sweet {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  quantity: number;
-}
+import type { Sweet } from "../types";
 
 export default function AdminDashboard() {
   const { isAdmin } = useAuth();

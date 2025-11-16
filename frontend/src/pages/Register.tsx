@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom"; // Import Link
 import api from "../services/api"; // Assuming you have this service
-import { useAuth } from "../context/AuthContext"; // Import useAuth if needed, or remove
 
 // Import icons
 import {
@@ -65,7 +64,7 @@ export default function Register() {
 
     try {
       // Use the 'api' service for consistency
-      const res = await api.post("/auth/register", {
+      await api.post("/auth/register", {
         email,
         password,
       });

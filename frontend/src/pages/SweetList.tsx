@@ -11,14 +11,7 @@ import {
 } from "@heroicons/react/24/outline";
 import SweetCard from "../components/SweetCard";
 import PurchaseModal from "../components/PurchaseModal";
-
-interface Sweet {
-  id: number;
-  name: string;
-  price: number;
-  category: string;
-  stock: number;
-}
+import type { Sweet } from "../types";
 
 export default function SweetList() {
   const [sweets, setSweets] = useState<Sweet[]>([]);
@@ -50,7 +43,7 @@ export default function SweetList() {
 
       const mapped = res.data.sweets.map((s: any) => ({
         ...s,
-        stock: s.stock ?? s.quantity,
+        quantity: s.quantity ?? s.stock,
       }));
 
       setSweets(mapped);
@@ -232,14 +225,14 @@ export default function SweetList() {
                         <p className="text-gray-600 font-medium">Stock</p>
                         <p
                           className={`text-lg font-bold ${
-                            sweet.stock > 10
+                            sweet.quantity > 10
                               ? "text-green-600"
-                              : sweet.stock > 0
+                              : sweet.quantity > 0
                               ? "text-orange-600"
                               : "text-red-600"
                           }`}
                         >
-                          {sweet.stock}
+                          {sweet.quantity}
                         </p>
                       </div>
                       <div>

@@ -1,15 +1,5 @@
-import {
-  ShoppingCartIcon,
-  ExclamationCircleIcon,
-} from "@heroicons/react/24/outline";
-
-interface Sweet {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-  quantity: number;
-}
+import { ShoppingCartIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import type { Sweet } from "../types";
 
 interface Props {
   sweet: Sweet;
