@@ -1,0 +1,12 @@
+{
+  // stop TypeScript project diagnostics (prevents VSCode from parsing tsconfigs inside node_modules)
+  "typescript.enableProjectDiagnostics": false,
+
+  // optional: hide node_modules from explorer/search to reduce noise
+  "files.exclude": {
+    "**/node_modules": true
+  },
+  "search.exclude": {
+    "**/node_modules": true
+  }
+}
