@@ -19,7 +19,9 @@ export default function App() {
     <div>
       <Navbar />
 
-      <Routes>
+      {/* Ensure pages are offset below the fixed navbar */}
+      <main className="pt-16 sm:pt-20">
+        <Routes>
         {/* Public */}
         <Route path="/" element={<Login />} />
 
@@ -103,7 +105,8 @@ export default function App() {
 
         {/* NOT AUTHORIZED */}
         <Route path="/not-authorized" element={<h1>Not Authorized</h1>} />
-      </Routes>
+        </Routes>
+      </main>
     </div>
   );
 }
