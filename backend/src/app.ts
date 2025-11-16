@@ -10,8 +10,19 @@ import adminOrderRoutes from "./routes/adminOrders";
 import { adminOnly } from "./middleware/adminOnly";
 
 const app = express();
-app.use(cors());
 app.use(express.json());
+
+const raw = process.env.ALLOWED_ORIGINS || "http://localhost:5173";
+const allowedOrigins = raw.split(",").map(s => s.trim());
+
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // allow non-browser requests
+    if (allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error("CORS not allowed by server"));
+  },
+  credentials: true,
+}));
 
 // ROUTES
 app.use("/api/auth", authRoutes);
