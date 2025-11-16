@@ -13,6 +13,9 @@ model User {
   passwordHash String
   role         Role     @default(USER)
   createdAt    DateTime @default(now())
+
+  // 👇 Relation added
+  orders       Order[]
 }
 
 model Sweet {
@@ -23,6 +26,20 @@ model Sweet {
   quantity  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // 👇 Relation added
+  orders     Order[]
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  sweetId   Int
+  quantity  Int
+  createdAt DateTime @default(now())
+
+  user   User  @relation(fields: [userId], references: [id])
+  sweet  Sweet @relation(fields: [sweetId], references: [id])
 }
 
 enum Role {

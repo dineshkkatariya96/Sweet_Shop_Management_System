@@ -1,41 +1,37 @@
 import request from "supertest";
 import app from "../app";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 describe("Purchase Sweet (TDD RED Phase)", () => {
-  
   let sweetId: number;
+  let userToken: string;
 
   beforeAll(async () => {
+    await prisma.order.deleteMany();
     await prisma.sweet.deleteMany();
     await prisma.user.deleteMany();
 
-    // Create a user
-    const user = await prisma.user.create({
-      data: {
-        email: "buyer@example.com",
-        passwordHash: "testpassword",
-        role: "USER"
-      }
+    const passwordHash = await bcrypt.hash("password123", 10);
+
+    await prisma.user.create({
+      data: { email: "testuser@example.com", passwordHash, role: "USER" }
     });
 
-    // Login user: but skip hashing, we'll override JWT manually
-    const res = await request(app)
+    const login = await request(app)
       .post("/api/auth/login")
-      .send({ email: "buyer@example.com", password: "testpassword" });
+      .send({ email: "testuser@example.com", password: "password123" });
 
-    // If your login doesn't work yet, we manually hardcode JWT later
-    // For now skip token: purchase endpoint shouldn't require auth until later
+    userToken = login.body.token;
 
-    // Create a sweet in DB
     const sweet = await prisma.sweet.create({
       data: {
-        name: "Barfi",
+        name: "Gulab Jamun",
         category: "Milk",
         price: 100,
-        quantity: 10
+        quantity: 10,
       }
     });
 
@@ -49,9 +45,8 @@ describe("Purchase Sweet (TDD RED Phase)", () => {
   it("should reduce quantity when a sweet is purchased", async () => {
     const res = await request(app)
       .post(`/api/sweets/${sweetId}/purchase`)
-      .send({
-        quantity: 3
-      });
+      .set("Authorization", `Bearer ${userToken}`)
+      .send({ quantity: 3 });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.updated.quantity).toBe(7);
@@ -60,12 +55,10 @@ describe("Purchase Sweet (TDD RED Phase)", () => {
   it("should fail when quantity exceeds stock", async () => {
     const res = await request(app)
       .post(`/api/sweets/${sweetId}/purchase`)
-      .send({
-        quantity: 50
-      });
+      .set("Authorization", `Bearer ${userToken}`)
+      .send({ quantity: 100 });
 
     expect(res.statusCode).toBe(400);
     expect(res.body.error).toBe("Insufficient stock");
   });
-
 });

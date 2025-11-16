@@ -56,17 +56,31 @@ export const updateSweet = async (
   return updated;
 };
 
-export const deleteSweet = async (sweetId: number) => {
-  const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
+export const deleteSweet = async (id: number) => {
+  // Check if sweet exists
+  const sweet = await prisma.sweet.findUnique({ where: { id } });
 
   if (!sweet) {
     throw new Error("Sweet not found");
   }
 
-  await prisma.sweet.delete({ where: { id: sweetId } });
+  // Check foreign key orders
+  const existingOrders = await prisma.order.findFirst({
+    where: { sweetId: id }
+  });
 
-  return true;
+  if (existingOrders) {
+    throw new Error("Cannot delete sweet with existing orders");
+  }
+
+  // Delete sweet
+  await prisma.sweet.delete({
+    where: { id }
+  });
+
+  return { message: "Sweet deleted successfully" };
 };
+
 
 export const listSweets = async ({
   category,
@@ -125,3 +139,9 @@ export const createOrder = async (userId: number, sweetId: number, quantity: num
   });
 };
 
+export const restockSweet = async (id: number, amount: number) => {
+  return prisma.sweet.update({
+    where: { id },
+    data: { quantity: { increment: amount } },
+  });
+};

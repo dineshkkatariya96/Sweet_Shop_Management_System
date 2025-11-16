@@ -7,9 +7,8 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
-    "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "outDir": "dist"
   },
-  "include": ["src", "jest.config.cjs"]
+  "include": ["src"]
 }

@@ -5,15 +5,16 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 describe("List Sweets (TDD RED Phase)", () => {
-
   beforeAll(async () => {
+    await prisma.order.deleteMany();
     await prisma.sweet.deleteMany();
+    await prisma.user.deleteMany();
 
     await prisma.sweet.createMany({
       data: [
-        { name: "Kaju Katli", category: "Dry Fruit", price: 500, quantity: 50 },
-        { name: "Gulab Jamun", category: "Milk", price: 150, quantity: 100 },
-        { name: "Rasgulla", category: "Milk", price: 140, quantity: 120 }
+        { name: "Kaju Katli", category: "DryFruit", price: 500, quantity: 20 },
+        { name: "Rasgulla", category: "Milk", price: 150, quantity: 50 },
+        { name: "Barfi", category: "Milk", price: 200, quantity: 30 }
       ]
     });
   });
@@ -30,16 +31,14 @@ describe("List Sweets (TDD RED Phase)", () => {
   });
 
   it("should filter sweets by category", async () => {
-    const res = await request(app)
-      .get("/api/sweets?category=Milk");
+    const res = await request(app).get("/api/sweets?category=Milk");
 
     expect(res.statusCode).toBe(200);
     expect(res.body.sweets.length).toBe(2);
   });
 
   it("should search sweets by name", async () => {
-    const res = await request(app)
-      .get("/api/sweets?search=Kaju");
+    const res = await request(app).get("/api/sweets?search=Kaju");
 
     expect(res.statusCode).toBe(200);
     expect(res.body.sweets.length).toBe(1);
@@ -47,11 +46,9 @@ describe("List Sweets (TDD RED Phase)", () => {
   });
 
   it("should paginate sweets", async () => {
-    const res = await request(app)
-      .get("/api/sweets?page=1&limit=2");
+    const res = await request(app).get("/api/sweets?page=1&limit=2");
 
     expect(res.statusCode).toBe(200);
     expect(res.body.sweets.length).toBe(2);
   });
-
 });

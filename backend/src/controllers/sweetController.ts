@@ -1,8 +1,13 @@
 import { Request, Response } from "express";
-import { reduceSweetStock, updateSweet ,createOrder} from "../services/sweetService";
-import { deleteSweet } from "../services/sweetService";
-import { listSweets } from "../services/sweetService";
-import { getSweetById } from "../services/sweetService";
+import { 
+  reduceSweetStock,
+  updateSweet,
+  createOrder,
+  deleteSweet,
+  listSweets,
+  getSweetById,
+  restockSweet
+} from "../services/sweetService";
 import jwt from "jsonwebtoken";
 
 export const purchaseSweetController = async (req: any, res: any) => {
@@ -10,13 +15,13 @@ export const purchaseSweetController = async (req: any, res: any) => {
   const { quantity } = req.body;
 
   try {
-    // decode user from token
+    // Decode user from token
     const token = req.headers.authorization?.split(" ")[1];
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET || "secret");
 
     const updated = await reduceSweetStock(sweetId, quantity);
 
-    // GREEN: Create order
+    // Create order for user
     await createOrder(decoded.userId, sweetId, quantity);
 
     return res.status(200).json({ updated });
@@ -28,7 +33,7 @@ export const purchaseSweetController = async (req: any, res: any) => {
   }
 };
 
-// 🟩 NEW — minimal update controller
+// UPDATE sweet
 export const updateSweetController = async (req: Request, res: Response) => {
   try {
     const sweetId = Number(req.params.id);
@@ -40,18 +45,21 @@ export const updateSweetController = async (req: Request, res: Response) => {
     return res.status(400).json({ error: error.message });
   }
 };
-// GREEN — minimal delete controller
-export const deleteSweetController = async (req: any, res: any) => {
-  const sweetId = Number(req.params.id);
 
+// DELETE sweet
+export const deleteSweetController = async (req: Request, res: Response) => {
   try {
-    await deleteSweet(sweetId);
-    return res.status(200).json({ message: "Sweet deleted" });
+    const sweetId = Number(req.params.id);
+
+    const result = await deleteSweet(sweetId);
+
+    return res.status(200).json(result);
   } catch (error: any) {
-    return res.status(404).json({ error: error.message });
+    return res.status(400).json({ error: error.message });
   }
 };
 
+// LIST sweets + SEARCH
 export const listSweetsController = async (req: any, res: any) => {
   try {
     const category = req.query.category ? String(req.query.category) : undefined;
@@ -64,13 +72,12 @@ export const listSweetsController = async (req: any, res: any) => {
 
     return res.status(200).json({ sweets });
   } catch (error: any) {
-    console.error("LIST ERROR:", error);   // 🔥 THIS SHOWS REAL PRISMA ERROR
+    console.error("LIST ERROR:", error);
     return res.status(500).json({ error: error.message });
   }
 };
 
-
-// GET single sweet (GREEN)
+// GET single sweet
 export const getSweetController = async (req: any, res: any) => {
   const sweetId = Number(req.params.id);
 
@@ -82,3 +89,20 @@ export const getSweetController = async (req: any, res: any) => {
   }
 };
 
+// RESTOCK sweet (Admin Only)
+export const restockSweetController = async (req: any, res: any) => {
+  try {
+    const sweetId = Number(req.params.id);
+    const { amount } = req.body;
+
+    const updated = await restockSweet(sweetId, amount);
+
+    return res.status(200).json({
+      message: "Sweet restocked successfully",
+      sweet: updated,
+    });
+
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message });
+  }
+};
