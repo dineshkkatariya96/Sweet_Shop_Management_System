@@ -2,10 +2,12 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function AdminRoute({ children }: any) {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loading } = useAuth();
 
-  if (!user) return <Navigate to="/login" />;
-  if (!isAdmin) return <Navigate to="/not-authorized" />;
+  if (loading) return <div className="p-10 text-center">Loading...</div>;
+
+  if (!user) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/not-authorized" replace />;
 
   return children;
 }

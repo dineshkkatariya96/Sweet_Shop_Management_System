@@ -45,14 +45,16 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* ADMIN ONLY */}
         <Route
-  path="/admin/restock/:id"
-  element={
-    <AdminRoute>
-      <RestockSweet />
-    </AdminRoute>
-  }
-/>
+          path="/admin/restock/:id"
+          element={
+            <AdminRoute>
+              <RestockSweet />
+            </AdminRoute>
+          }
+        />
 
         <Route
           path="/dashboard"
@@ -63,7 +65,6 @@ export default function App() {
           }
         />
 
-        {/* ADMIN ROUTES */}
         <Route
           path="/admin"
           element={
