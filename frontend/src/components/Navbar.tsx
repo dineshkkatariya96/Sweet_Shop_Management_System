@@ -1,8 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-// Import a relevant icon for the logout button
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightOnRectangleIcon,
+  HomeIcon,
+  ShoppingCartIcon,
+  ClipboardDocumentListIcon,
+} from "@heroicons/react/24/outline";
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
@@ -14,77 +18,87 @@ export default function Navbar() {
   };
 
   return (
-    // --- UI Improvement ---
-    // 1. sticky top-0: Makes the navbar stay at the top.
-    // 2. z-50: Ensures it's above other content.
-    // 3. bg-white/80 backdrop-blur-md: The exact "glassmorphism" effect from your forms.
-    // 4. shadow-lg: A slightly stronger shadow to make it "pop".
-    // 5. border-b...: A subtle border to match the form card.
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-lg px-6 py-4 flex justify-between items-center border-b border-white/30">
-      
-      {/* --- UI Improvement: Themed Logo --- */}
-      <Link 
-        to="/" 
-        className="text-2xl font-extrabold text-purple-600 hover:text-purple-700 transition"
-      >
-        Sweet Shop 🍬
-      </Link>
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-lg px-4 sm:px-6 py-4 border-b-2 border-purple-100/50">
+      <div className="max-w-7xl mx-auto flex justify-between items-center gap-6">
+        {/* LOGO */}
+        <Link
+          to="/"
+          className="text-2xl sm:text-3xl font-extrabold text-transparent bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text hover:scale-110 transition-transform"
+        >
+          🍬 Sweet Shop
+        </Link>
 
-      {/* --- UI Improvement: Grouped & Themed Links --- */}
-      <div className="flex items-center gap-6">
-        {!user && (
-          <>
-            <Link 
-              to="/login" 
-              className="font-medium text-gray-700 hover:text-purple-600 transition-colors"
-            >
-              Login
-            </Link>
-            {/* Themed "primary" button */}
-            <Link 
-              to="/register"
-              className="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 transition-all focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-            >
-              Register
-            </Link>
-          </>
-        )}
-
-        {user && (
-          <>
-            {/* Themed "text" links */}
-            <Link 
-              to="/dashboard"
-              className="font-medium text-gray-700 hover:text-purple-600 transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link 
-              to="/orders"
-              className="font-medium text-gray-700 hover:text-purple-600 transition-colors"
-            >
-              My Orders
-            </Link>
-
-            {isAdmin && (
-              <Link 
-                to="/admin/orders"
-                className="font-medium text-gray-700 hover:text-purple-600 transition-colors"
+        {/* NAVIGATION LINKS */}
+        <div className="flex items-center gap-4 sm:gap-6">
+          {!user && (
+            <>
+              <Link
+                to="/login"
+                className="px-4 py-2 text-gray-700 font-semibold hover:text-purple-600 transition-all hover:scale-110"
               >
-                Admin Orders
+                Login
               </Link>
-            )}
+              <Link
+                to="/register"
+                className="px-4 sm:px-6 py-2 bg-linear-to-r from-purple-600 to-pink-600 text-white font-bold rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all"
+              >
+                Register
+              </Link>
+            </>
+          )}
 
-            {/* Themed "danger" button/link */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 font-medium text-red-500 hover:text-red-700 transition-colors"
-            >
-              <ArrowRightOnRectangleIcon className="h-5 w-5" />
-              Logout
-            </button>
-          </>
-        )}
+          {user && (
+            <>
+              {/* Dashboard Link */}
+              <Link
+                to="/dashboard"
+                className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 font-semibold hover:text-purple-600 transition-all rounded-lg hover:bg-purple-50"
+              >
+                <HomeIcon className="h-5 w-5" />
+                Dashboard
+              </Link>
+
+              {/* My Orders Link (Customer Only) */}
+              {!isAdmin && (
+                <Link
+                  to="/orders"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 font-semibold hover:text-purple-600 transition-all rounded-lg hover:bg-purple-50"
+                >
+                  <ShoppingCartIcon className="h-5 w-5" />
+                  Orders
+                </Link>
+              )}
+
+              {/* Admin Orders Link (Admin Only) */}
+              {isAdmin && (
+                <Link
+                  to="/admin/orders"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-gray-700 font-semibold hover:text-orange-600 transition-all rounded-lg hover:bg-orange-50"
+                >
+                  <ClipboardDocumentListIcon className="h-5 w-5" />
+                  Orders
+                </Link>
+              )}
+
+              {/* Mobile Menu Icon */}
+              <button
+                onClick={() => navigate("/dashboard")}
+                className="sm:hidden p-2 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                <HomeIcon className="h-6 w-6 text-gray-700" />
+              </button>
+
+              {/* Logout Button */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 text-red-600 font-bold hover:bg-red-50 rounded-lg transition-all hover:scale-105"
+              >
+                <ArrowRightOnRectangleIcon className="h-5 w-5" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

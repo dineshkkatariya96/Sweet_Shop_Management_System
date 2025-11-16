@@ -1,6 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import {
+  PlusCircleIcon,
+  ArrowLeftIcon,
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import Input from "../../components/Input";
 
 export default function AddSweet() {
   const navigate = useNavigate();
@@ -28,18 +35,19 @@ export default function AddSweet() {
         {
           name,
           price: Number(price),
-          quantity: Number(quantity),   // ✅ FIXED (Backend expects quantity)
+          quantity: Number(quantity),
           category,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      setSuccessMsg("🎉 Sweet added successfully!");
+      setSuccessMsg("✅ Sweet added successfully!");
       setName("");
       setPrice("");
       setQuantity("");
       setCategory("");
 
+      setTimeout(() => navigate("/sweets"), 1500);
     } catch (err: any) {
       setErrorMsg(err.response?.data?.error || "Failed to add sweet");
     } finally {
@@ -48,93 +56,98 @@ export default function AddSweet() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-200 via-pink-200 to-yellow-200 p-8">
-      <div className="max-w-xl mx-auto bg-white shadow-2xl rounded-2xl p-8">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-yellow-50 p-4 sm:p-10 pt-24 flex justify-center items-center">
+      <div className="w-full max-w-2xl glass rounded-3xl p-8 shadow-xl">
+        {/* Icon Header */}
+        <div className="flex justify-center mb-6">
+          <div className="p-4 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-full shadow-lg">
+            <PlusCircleIcon className="h-8 w-8" />
+          </div>
+        </div>
 
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          🍬 Add New Sweet
-        </h2>
+        {/* Heading */}
+        <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
+          Add New Sweet
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Add a delicious sweet to your inventory
+        </p>
 
+        {/* Success Message */}
         {successMsg && (
-          <p className="text-green-600 font-semibold mb-4 text-center">
-            {successMsg}
-          </p>
+          <div className="mb-6 p-4 bg-green-100 border-2 border-green-300 text-green-700 rounded-xl flex items-center gap-3">
+            <CheckCircleIcon className="h-5 w-5 shrink-0" />
+            <span className="font-semibold">{successMsg}</span>
+          </div>
         )}
+
+        {/* Error Message */}
         {errorMsg && (
-          <p className="text-red-600 font-semibold mb-4 text-center">
-            {errorMsg}
-          </p>
+          <div className="mb-6 p-4 bg-red-100 border-2 border-red-300 text-red-700 rounded-xl flex items-center gap-3">
+            <ExclamationTriangleIcon className="h-5 w-5 shrink-0" />
+            <span className="font-semibold">{errorMsg}</span>
+          </div>
         )}
 
-        <form onSubmit={handleAddSweet} className="space-y-5">
+        {/* Form */}
+        <form onSubmit={handleAddSweet} className="space-y-6">
+          <Input
+            label="Sweet Name"
+            type="text"
+            placeholder="e.g., Kaju Katli"
+            value={name}
+            onChange={setName}
+            required
+            disabled={loading}
+          />
 
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">Sweet Name</label>
-            <input
-              required
-              type="text"
-              placeholder="Kaju Katli"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-purple-400"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+          <Input
+            label="Price (₹)"
+            type="number"
+            placeholder="e.g., 350"
+            value={price}
+            onChange={setPrice}
+            required
+            disabled={loading}
+          />
 
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">Price (₹)</label>
-            <input
-              required
-              type="number"
-              placeholder="350"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-purple-400"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-            />
-          </div>
+          <Input
+            label="Quantity"
+            type="number"
+            placeholder="e.g., 50"
+            value={quantity}
+            onChange={setQuantity}
+            required
+            disabled={loading}
+          />
 
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">Quantity</label>
-            <input
-              required
-              type="number"
-              placeholder="20"
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-purple-400"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 font-semibold mb-1">Category</label>
-            <input
-              required
-              type="text"
-              placeholder="Milk, Dryfruit, Sugar-free..."
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 shadow-sm focus:ring-2 focus:ring-purple-400"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            />
-          </div>
+          <Input
+            label="Category"
+            type="text"
+            placeholder="e.g., Milk, Dryfruit, Sugar-free"
+            value={category}
+            onChange={setCategory}
+            required
+            disabled={loading}
+          />
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-3 bg-purple-600 text-white font-semibold rounded-xl shadow-md hover:bg-purple-700 transition-all ${
-              loading && "opacity-50 cursor-not-allowed"
-            }`}
+            className="w-full py-3 bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl font-bold hover:shadow-lg hover:shadow-purple-400/50 transition-all transform active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {loading ? "Adding..." : "Add Sweet"}
+            {loading ? "Adding Sweet..." : "Add Sweet"}
           </button>
-
         </form>
 
+        {/* Back Button */}
         <button
-          onClick={() => navigate("/dashboard")}
-          className="w-full mt-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-black transition-all"
+          onClick={() => navigate("/sweets")}
+          className="w-full mt-4 py-3 bg-gray-200 text-gray-800 rounded-xl font-semibold hover:bg-gray-300 transition-all flex items-center justify-center gap-2"
         >
-          ⬅ Back to Dashboard
+          <ArrowLeftIcon className="h-5 w-5" />
+          Back to Sweet List
         </button>
-
       </div>
     </div>
   );

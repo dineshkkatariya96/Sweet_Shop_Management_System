@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ClipboardDocumentListIcon, UserIcon, CakeIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentListIcon,
+  ArrowLeftIcon,
+  UserIcon,
+  CakeIcon,
+  CalendarDaysIcon,
+} from "@heroicons/react/24/outline";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminOrderHistory() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const token = localStorage.getItem("token");
 
@@ -27,84 +35,157 @@ export default function AdminOrderHistory() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex justify-center items-center text-xl font-semibold">
-        Loading admin orders...
+      <div className="min-h-screen flex flex-col justify-center items-center">
+        <div className="animate-bounce mb-4">
+          <div className="h-16 w-16 bg-linear-to-r from-orange-600 to-yellow-600 rounded-full" />
+        </div>
+        <p className="text-2xl font-bold text-gray-900">Loading admin orders...</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-100 via-orange-100 to-pink-100 p-10 flex justify-center">
-      <div
-        className="
-          w-full max-w-4xl 
-          bg-white/70 backdrop-blur-xl 
-          shadow-2xl rounded-3xl 
-          border border-white/40 
-          p-10
-        "
-      >
-        {/* Header */}
-        <div className="flex items-center justify-center gap-3 mb-10">
-          <ClipboardDocumentListIcon className="h-10 w-10 text-orange-600" />
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-wide">
-            Admin — All Orders
+    <div className="min-h-screen bg-linear-to-br from-orange-50 via-yellow-50 to-pink-50 p-4 sm:p-10 pt-24">
+      <div className="max-w-5xl mx-auto">
+        {/* HEADER */}
+        <div className="text-center mb-12 animate-fade-in-up">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 bg-linear-to-r from-orange-600 to-yellow-600 text-white rounded-full shadow-lg">
+              <ClipboardDocumentListIcon className="h-8 w-8" />
+            </div>
+          </div>
+          <h1 className="text-5xl sm:text-6xl font-extrabold mb-4 text-transparent bg-linear-to-r from-orange-600 to-yellow-600 bg-clip-text">
+            All Customer Orders
           </h1>
+          <p className="text-gray-600 text-lg font-medium">
+            Monitor and manage all orders from your shop
+          </p>
         </div>
 
-        {/* No Orders */}
+        {/* NO ORDERS STATE */}
         {orders.length === 0 ? (
-          <div className="text-center text-gray-600 text-lg bg-white/60 p-8 rounded-xl shadow-inner">
-            No orders placed yet 📭
+          <div className="glass rounded-2xl p-12 shadow-lg text-center">
+            <div className="text-6xl mb-4">📭</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              No orders yet
+            </h2>
+            <p className="text-gray-600">
+              Orders from customers will appear here
+            </p>
           </div>
         ) : (
-          <div className="space-y-6">
-            {orders.map((o: any) => (
+          <div className="space-y-5">
+            {orders.map((o: any, idx: number) => (
               <div
                 key={o.id}
-                className="
-                  bg-white p-6 rounded-xl 
-                  shadow-md hover:shadow-xl transition-all 
-                  border border-gray-200
-                "
+                className="glass rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all animate-fade-in-up"
+                style={{ animationDelay: `${idx * 0.1}s` }}
               >
-                <div className="flex justify-between items-center">
-                  {/* Left side */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                  {/* Main Info */}
+                  <div className="flex-1">
+                    {/* Sweet Name */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-pink-100 rounded-full">
+                        <CakeIcon className="h-6 w-6 text-pink-600" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {o.sweet.name}
+                      </h2>
+                    </div>
+
+                    {/* Order Details Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                      <div>
+                        <p className="text-gray-600 text-sm font-medium">
+                          Quantity
+                        </p>
+                        <p className="text-lg font-bold text-purple-600">
+                          {o.quantity}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-600 text-sm font-medium">
+                          <CalendarDaysIcon className="h-4 w-4 inline mr-1" />
+                          Date
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          {new Date(o.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-600 text-sm font-medium">
+                          <UserIcon className="h-4 w-4 inline mr-1" />
+                          Customer ID
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          #{o.userId}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-600 text-sm font-medium">
+                          Order ID
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900">
+                          #{o.id}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Time Info */}
+                    <p className="text-xs text-gray-500">
+                      {new Date(o.createdAt).toLocaleTimeString()}
+                    </p>
+                  </div>
+
+                  {/* Status Badge */}
                   <div>
-                    <p className="text-gray-900 text-lg font-bold flex items-center gap-2">
-                      <CakeIcon className="h-5 w-5 text-pink-600" />
-                      {o.sweet.name}
-                    </p>
-
-                    <p className="mt-1 text-gray-700">
-                      <strong>Quantity:</strong>{" "}
-                      <span className="font-semibold">{o.quantity}</span>
-                    </p>
-
-                    <p className="mt-1 text-gray-700">
-                      <strong>Date:</strong>{" "}
-                      <span className="font-semibold">
-                        {new Date(o.createdAt).toLocaleString()}
-                      </span>
-                    </p>
+                    <span className="inline-block px-6 py-2 bg-linear-to-r from-green-500 to-emerald-500 text-white rounded-full text-sm font-bold shadow-lg">
+                      ✅ Completed
+                    </span>
                   </div>
-
-                  {/* Right side */}
-                  <div className="bg-purple-100 text-purple-700 px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-2 shadow">
-                    <UserIcon className="h-5 w-5" />
-                    User #{o.userId}
-                  </div>
-                </div>
-
-                {/* Order Number */}
-                <div className="mt-4 flex justify-end">
-                  <span className="px-4 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
-                    Order #{o.id}
-                  </span>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        {/* STATS */}
+        {orders.length > 0 && (
+          <div className="mt-12 grid sm:grid-cols-3 gap-4">
+            <div className="glass rounded-2xl p-6 text-center shadow-lg">
+              <p className="text-gray-600 font-medium mb-2">Total Orders</p>
+              <p className="text-4xl font-extrabold text-purple-600">
+                {orders.length}
+              </p>
+            </div>
+            <div className="glass rounded-2xl p-6 text-center shadow-lg">
+              <p className="text-gray-600 font-medium mb-2">Total Items Sold</p>
+              <p className="text-4xl font-extrabold text-pink-600">
+                {orders.reduce((sum, o) => sum + o.quantity, 0)}
+              </p>
+            </div>
+            <div className="glass rounded-2xl p-6 text-center shadow-lg">
+              <p className="text-gray-600 font-medium mb-2">Unique Customers</p>
+              <p className="text-4xl font-extrabold text-blue-600">
+                {new Set(orders.map((o) => o.userId)).size}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* BACK BUTTON */}
+        <div className="text-center mt-12">
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="px-8 py-3 bg-linear-to-r from-gray-800 to-black text-white rounded-xl font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2 mx-auto"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+            Back to Dashboard
+          </button>
+        </div>
       </div>
     </div>
   );
