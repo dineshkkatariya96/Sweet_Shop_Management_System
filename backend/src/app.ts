@@ -25,10 +25,13 @@ app.get("/", (req, res) => {
   res.json({ message: "Sweet Shop API is running" });
 });
 
-// ⭐ ADD PORT HERE ⭐
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
