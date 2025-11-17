@@ -19,92 +19,88 @@ export default function App() {
     <div>
       <Navbar />
 
-      {/* Ensure pages are offset below the fixed navbar */}
+      {/* To avoid overlap with fixed Navbar */}
       <main className="pt-16 sm:pt-20">
         <Routes>
-        {/* Public */}
-        <Route path="/" element={<Login />} />
+          {/* PUBLIC ROUTES */}
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/admin/sweets"
+            element={
+              <AdminRoute>
+                <SweetList />
+              </AdminRoute>
+            }
+          />
 
-        {/* Authentication */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+          {/* USER PROTECTED ROUTES */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* USER PROTECTED ROUTES */}
-        <Route
-          path="/sweets"
-          element={
-            <ProtectedRoute>
-              <SweetList />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/sweets"
+            element={
+              <ProtectedRoute>
+                <SweetList />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="/orders"
-          element={
-            <ProtectedRoute>
-              <OrderHistory />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/orders"
+            element={
+              <ProtectedRoute>
+                <OrderHistory />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* ADMIN ONLY */}
-        <Route
-          path="/admin/restock/:id"
-          element={
-            <AdminRoute>
-              <RestockSweet />
-            </AdminRoute>
-          }
-        />
+          {/* ADMIN ONLY ROUTES */}
+          <Route
+            path="/admin/add-sweet"
+            element={
+              <AdminRoute>
+                <AddSweet />
+              </AdminRoute>
+            }
+          />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/admin/edit-sweet/:id"
+            element={
+              <AdminRoute>
+                <EditSweet />
+              </AdminRoute>
+            }
+          />
 
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <h1 className="p-10">Admin Panel</h1>
-            </AdminRoute>
-          }
-        />
+          <Route
+            path="/admin/restock/:id"
+            element={
+              <AdminRoute>
+                <RestockSweet />
+              </AdminRoute>
+            }
+          />
 
-        <Route
-          path="/admin/add-sweet"
-          element={
-            <AdminRoute>
-              <AddSweet />
-            </AdminRoute>
-          }
-        />
+          <Route
+            path="/admin/orders"
+            element={
+              <AdminRoute>
+                <AdminOrderHistory />
+              </AdminRoute>
+            }
+          />
 
-        <Route
-          path="/admin/edit-sweet/:id"
-          element={
-            <AdminRoute>
-              <EditSweet />
-            </AdminRoute>
-          }
-        />
-
-        <Route
-          path="/admin/orders"
-          element={
-            <AdminRoute>
-              <AdminOrderHistory />
-            </AdminRoute>
-          }
-        />
-
-        {/* NOT AUTHORIZED */}
-        <Route path="/not-authorized" element={<h1>Not Authorized</h1>} />
+          <Route path="/not-authorized" element={<h1>Not Authorized</h1>} />
         </Routes>
       </main>
     </div>

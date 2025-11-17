@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import {
@@ -30,30 +30,33 @@ export default function SweetList() {
 
   const isAdmin = user?.role === "ADMIN";
 
-  // Fetch sweets API
-  const fetchSweets = async () => {
-    try {
-      const query = new URLSearchParams();
-      if (search) query.append("search", search);
-      if (category) query.append("category", category);
+const fetchSweets = async () => {
+  try {
+    const query = new URLSearchParams();
+    if (search) query.append("search", search);
+    if (category) query.append("category", category);
 
-      const res = await axios.get(
-        `http://localhost:3000/api/sweets?${query.toString()}`
-      );
+    const res = await api.get(
+      `sweets?${query.toString()}`
+    );
 
-      const mapped = res.data.sweets.map((s: any) => ({
-        ...s,
-        quantity: s.quantity ?? s.stock,
-      }));
+    const mapped = res.data.sweets.map((s: any) => ({
+      id: s._id,              // ✅ FIX: Convert _id → id
+      name: s.name,
+      category: s.category,
+      price: s.price,
+      quantity: s.quantity ?? s.stock,
+    }));
 
-      setSweets(mapped);
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load sweets");
-    } finally {
-      setLoading(false);
-    }
-  };
+    setSweets(mapped);
+  } catch (err) {
+    console.error(err);
+    setError("Failed to load sweets");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchSweets();
@@ -75,8 +78,8 @@ export default function SweetList() {
     if (!selectedSweet) return;
 
     try {
-      await axios.post(
-        `http://localhost:3000/api/sweets/${selectedSweet.id}/purchase`,
+      await api.post(
+        `/sweets/${selectedSweet.id}/purchase`,
         { quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -94,8 +97,8 @@ export default function SweetList() {
     if (!confirm("Are you sure you want to delete this sweet?")) return;
 
     try {
-      await axios.delete(
-        `http://localhost:3000/api/sweets/${sweetId}`,
+      await api.delete(
+        `/sweets/${sweetId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 

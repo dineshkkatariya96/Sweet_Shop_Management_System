@@ -1,15 +1,5 @@
-import axios from "axios";
+import api from "./api";  // your axios instance with token interceptor
 
-export const purchaseSweet = async (sweetId: number, quantity: number) => {
-  const token = localStorage.getItem("token");
-
-  return axios.post(
-    `http://localhost:3000/api/orders/${sweetId}`,
-    { quantity },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export const purchaseSweet = async (sweetId: string, quantity: number) => {
+  return api.post(`/sweets/${sweetId}/purchase`, { quantity });
 };

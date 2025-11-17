@@ -1,147 +1,91 @@
-import { PrismaClient } from "@prisma/client";
+import Sweet, { ISweet } from "../models/Sweet";
+import Order from "../models/Order";
 
-const prisma = new PrismaClient();
-
-export const reduceSweetStock = async (sweetId: number, quantity: number) => {
-  const sweet = await prisma.sweet.findUnique({ where: { id: sweetId } });
-
-  if (!sweet) {
-    throw new Error("Sweet not found");
-  }
-
-  if (sweet.quantity < quantity) {
-    throw new Error("Insufficient stock");
-  }
-
-  const updated = await prisma.sweet.update({
-    where: { id: sweetId },
-    data: {
-      quantity: sweet.quantity - quantity
-    }
-  });
-
-  return updated;
-};
-
-// UPDATE SWEET (ADMIN)
-export const updateSweet = async (
-  id: number,
-  data: {
-    name?: string;
-    category?: string;
-    price?: number;
-    quantity?: number;
-  }
-) => {
-  // Validation
-  if (data.price !== undefined && data.price <= 0) {
-    throw new Error("Price must be greater than 0");
-  }
-
-  if (data.quantity !== undefined && data.quantity < 0) {
-    throw new Error("Quantity cannot be negative");
-  }
-
-  // Ensure sweet exists
-  const sweet = await prisma.sweet.findUnique({ where: { id } });
-  if (!sweet) {
-    throw new Error("Sweet not found");
-  }
-
-  const updated = await prisma.sweet.update({
-    where: { id },
-    data
-  });
-
-  return updated;
-};
-
-export const deleteSweet = async (id: number) => {
-  // Check if sweet exists
-  const sweet = await prisma.sweet.findUnique({ where: { id } });
-
-  if (!sweet) {
-    throw new Error("Sweet not found");
-  }
-
-  // Check foreign key orders
-  const existingOrders = await prisma.order.findFirst({
-    where: { sweetId: id }
-  });
-
-  if (existingOrders) {
-    throw new Error("Cannot delete sweet with existing orders");
-  }
-
-  // Delete sweet
-  await prisma.sweet.delete({
-    where: { id }
-  });
-
-  return { message: "Sweet deleted successfully" };
-};
-
-
-export const listSweets = async ({
-  category,
-  search,
-  page = 1,
-  limit = 10,
-}: {
-  category?: string;
-  search?: string;
-  page?: number;
-  limit?: number;
-}) => {
-  const where: any = {};
-
-  if (category && category.trim() !== "") {
-    where.category = category;
-  }
-
-  // FIXED for SQLite — remove mode: "insensitive"
-  if (search && search.trim() !== "") {
-    where.name = {
-      contains: search,
-    };
-  }
+export const listSweets = async ({ category, search, page = 1, limit = 10 }: any) => {
+  const filter: any = {};
+  if (category) filter.category = category;
+  if (search) filter.name = { $regex: search, $options: "i" };
 
   const skip = (page - 1) * limit;
-
-  const sweets = await prisma.sweet.findMany({
-    where,
-    skip,
-    take: limit,
-  });
-
-  return sweets;
+  const sweets = await Sweet.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 });
+  const total = await Sweet.countDocuments(filter);
+  return { sweets, total };
 };
 
-export const getSweetById = async (sweetId: number) => {
-  const sweet = await prisma.sweet.findUnique({
-    where: { id: sweetId }
-  });
-
-  if (!sweet) {
-    throw new Error("Sweet not found");
-  }
-
-  return sweet;
+export const getSweetById = async (id: string) => {
+  const s = await Sweet.findById(id);
+  if (!s) throw new Error("Sweet not found");
+  return s;
 };
 
-export const createOrder = async (userId: number, sweetId: number, quantity: number) => {
-  return prisma.order.create({
-    data: {
-      userId,
-      sweetId,
-      quantity,
-    },
-  });
+export const createSweet = async (payload: Partial<ISweet>) => {
+  const s = new Sweet(payload);
+  await s.save();
+  return s;
 };
 
-export const restockSweet = async (id: number, amount: number) => {
-  return prisma.sweet.update({
-    where: { id },
-    data: { quantity: { increment: amount } },
-  });
+export const updateSweet = async (id: string, payload: Partial<ISweet>) => {
+  const s = await Sweet.findByIdAndUpdate(id, payload, { new: true });
+  if (!s) throw new Error("Sweet not found");
+  return s;
+};
+
+export const deleteSweet = async (id: string) => {
+  const existingOrder = await Order.findOne({ sweetId: id });
+  if (existingOrder) throw new Error("Cannot delete sweet with existing orders");
+  await Sweet.findByIdAndDelete(id);
+  return { success: true };
+};
+
+export const reduceSweetStock = async (id: string, quantity: number) => {
+  if (!quantity || quantity <= 0) quantity = 1;
+
+  const s = await Sweet.findOneAndUpdate(
+    { _id: id, quantity: { $gte: quantity } },
+    { $inc: { quantity: -quantity } },
+    { new: true }
+  );
+  if (!s) throw new Error("Insufficient stock");
+  return s;
+};
+
+export const restockSweet = async (id: string, quantity: number) => {
+  if (!quantity || quantity <= 0) throw new Error("Invalid restock quantity");
+  const s = await Sweet.findByIdAndUpdate(id, { $inc: { quantity } }, { new: true });
+  if (!s) throw new Error("Sweet not found");
+  return s;
+};
+
+export const createOrder = async (userId: string, sweetId: string, quantity: number) => {
+  const order = new Order({ userId, sweetId, quantity });
+  await order.save();
+  return order;
+};
+
+// 🔥 FIXED: user order history
+export const getUserOrders = async (userId: string) => {
+  const orders = await Order.find({ userId })
+    .populate({ path: "sweetId", model: "Sweet" })
+    .lean();
+
+  return orders.map(o => ({
+    ...o,
+    sweet: o.sweetId,   // convert sweetId → sweet
+    id: o._id,
+  }));
+};
+
+// 🔥 FIXED: admin order history
+export const getAllOrders = async () => {
+  const orders = await Order.find()
+    .populate({ path: "sweetId", model: "Sweet" })
+    .populate({ path: "userId", model: "User" })
+    .lean();
+
+  return orders.map(o => ({
+    ...o,
+    sweet: o.sweetId,
+    user: o.userId,
+    id: o._id,
+  }));
 };

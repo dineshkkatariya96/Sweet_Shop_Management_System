@@ -1,48 +1,77 @@
+// src/app.ts
+import dotenv from "dotenv";
+dotenv.config(); 
 import express from "express";
 import cors from "cors";
+import mongoose from "mongoose";
 
 import authRoutes from "./routes/auth";
 import sweetsRoutes from "./routes/sweets";
 import orderRoutes from "./routes/orders";
-
-import userOrderRoutes from "./routes/userOrders";
 import adminOrderRoutes from "./routes/adminOrders";
-import { adminOnly } from "./middleware/adminOnly";
 
 const app = express();
+
+// CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://sweet-shop-management-system-aqbt.vercel.app",
+  "https://sweet-shop-management-system-aqbt-1qniasq9r.vercel.app",
+  "https://sweet-shop-management-system-beta.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // Allow non-browser requests (like Postman, mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log("❌ BLOCKED BY CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Authorization"],
+  })
+);
+
+
+// body parser
 app.use(express.json());
 
-const raw = process.env.ALLOWED_ORIGINS || "http://localhost:5173";
-const allowedOrigins = raw.split(",").map(s => s.trim());
-
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // allow non-browser requests
-    if (allowedOrigins.includes(origin)) return cb(null, true);
-    cb(new Error("CORS not allowed by server"));
-  },
-  credentials: true,
-}));
-
-// ROUTES
+// Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/sweets", sweetsRoutes);
-app.use("/api/orders", userOrderRoutes);
-app.use("/api/admin/orders", adminOnly, adminOrderRoutes);
+app.use("/api/admin/orders", adminOrderRoutes);
 app.use("/api/orders", orderRoutes);
 
-// Health route
-app.get("/", (req, res) => {
-  res.json({ message: "Sweet Shop API is running" });
+// health
+app.get("/", (_req, res) => res.json({ message: "Sweet Shop API (MongoDB)" }));
+
+// basic error handler
+app.use((err: any, _req: express.Request, res: express.Response, _next: any) => {
+  console.error("Unhandled error:", err);
+  res.status(err.status || 500).json({ error: err.message || "Server error" });
 });
 
+// start server + connect mongoose
+const PORT = parseInt(process.env.PORT || "3000", 10);
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/sweetshop";
 
-if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    // eslint-disable-next-line no-console
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+mongoose
+  .connect(MONGO_URI)
+  .then(() => {
+    console.log("Connected to MongoDB");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error("Mongo connect error:", err);
+    process.exit(1);
   });
-}
 
 export default app;

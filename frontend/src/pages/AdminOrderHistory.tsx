@@ -46,6 +46,7 @@ export default function AdminOrderHistory() {
   return (
     <div className="min-h-screen bg-linear-to-br from-orange-50 via-yellow-50 to-pink-50 p-4 sm:p-10 pt-24">
       <div className="max-w-5xl mx-auto">
+
         {/* HEADER */}
         <div className="text-center mb-12 animate-fade-in-up">
           <div className="flex justify-center mb-4">
@@ -65,43 +66,38 @@ export default function AdminOrderHistory() {
         {orders.length === 0 ? (
           <div className="glass rounded-2xl p-12 shadow-lg text-center">
             <div className="text-6xl mb-4">📭</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              No orders yet
-            </h2>
-            <p className="text-gray-600">
-              Orders from customers will appear here
-            </p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">No orders yet</h2>
+            <p className="text-gray-600">Orders from customers will appear here</p>
           </div>
         ) : (
           <div className="space-y-5">
             {orders.map((o: any, idx: number) => (
               <div
-                key={o.id}
+                key={o._id}
                 className="glass rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all animate-fade-in-up"
                 style={{ animationDelay: `${idx * 0.1}s` }}
               >
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                  
                   {/* Main Info */}
                   <div className="flex-1">
+
                     {/* Sweet Name */}
                     <div className="flex items-center gap-3 mb-4">
                       <div className="p-2 bg-pink-100 rounded-full">
                         <CakeIcon className="h-6 w-6 text-pink-600" />
                       </div>
                       <h2 className="text-2xl font-bold text-gray-900">
-                        {o.sweet.name}
+                        {o.sweetId?.name ?? "Unknown Sweet"}
                       </h2>
                     </div>
 
                     {/* Order Details Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">
-                          Quantity
-                        </p>
-                        <p className="text-lg font-bold text-purple-600">
-                          {o.quantity}
-                        </p>
+                        <p className="text-gray-600 text-sm font-medium">Quantity</p>
+                        <p className="text-lg font-bold text-purple-600">{o.quantity}</p>
                       </div>
 
                       <div>
@@ -117,24 +113,22 @@ export default function AdminOrderHistory() {
                       <div>
                         <p className="text-gray-600 text-sm font-medium">
                           <UserIcon className="h-4 w-4 inline mr-1" />
-                          Customer ID
+                          Customer
                         </p>
                         <p className="text-sm font-semibold text-gray-900">
-                          #{o.userId}
+                          {o.userId?.email ?? "Unknown User"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-gray-600 text-sm font-medium">
-                          Order ID
-                        </p>
+                        <p className="text-gray-600 text-sm font-medium">Order ID</p>
                         <p className="text-sm font-semibold text-gray-900">
-                          #{o.id}
+                          #{o._id}
                         </p>
                       </div>
                     </div>
 
-                    {/* Time Info */}
+                    {/* Time */}
                     <p className="text-xs text-gray-500">
                       {new Date(o.createdAt).toLocaleTimeString()}
                     </p>
@@ -149,30 +143,6 @@ export default function AdminOrderHistory() {
                 </div>
               </div>
             ))}
-          </div>
-        )}
-
-        {/* STATS */}
-        {orders.length > 0 && (
-          <div className="mt-12 grid sm:grid-cols-3 gap-4">
-            <div className="glass rounded-2xl p-6 text-center shadow-lg">
-              <p className="text-gray-600 font-medium mb-2">Total Orders</p>
-              <p className="text-4xl font-extrabold text-purple-600">
-                {orders.length}
-              </p>
-            </div>
-            <div className="glass rounded-2xl p-6 text-center shadow-lg">
-              <p className="text-gray-600 font-medium mb-2">Total Items Sold</p>
-              <p className="text-4xl font-extrabold text-pink-600">
-                {orders.reduce((sum, o) => sum + o.quantity, 0)}
-              </p>
-            </div>
-            <div className="glass rounded-2xl p-6 text-center shadow-lg">
-              <p className="text-gray-600 font-medium mb-2">Unique Customers</p>
-              <p className="text-4xl font-extrabold text-blue-600">
-                {new Set(orders.map((o) => o.userId)).size}
-              </p>
-            </div>
           </div>
         )}
 

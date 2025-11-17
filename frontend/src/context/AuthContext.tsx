@@ -1,8 +1,9 @@
+// src/context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "../services/api";
 
 interface User {
-  id: number;
+  id: string; // <- changed to string (backend uses string IDs)
   email: string;
   role: "ADMIN" | "USER";
 }
@@ -11,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
-  setUser: (u: User | null) => void;
+  setUser: (u: User | null, token?: string | null) => void;
   logout: () => void;
 }
 
@@ -38,19 +39,28 @@ export const AuthProvider = ({ children }: any) => {
     if (token && userData) {
       try {
         setUserState(JSON.parse(userData));
-      } catch {}
+      } catch {
+        // ignore parse errors
+      }
     }
 
     setLoading(false);
   }, []);
 
-  const setUser = (u: User | null) => {
+  // setUser now optionally accepts token so login code can call setUser(user, token)
+  const setUser = (u: User | null, token?: string | null) => {
     setUserState(u);
 
     if (u) {
       localStorage.setItem("user", JSON.stringify(u));
     } else {
       localStorage.removeItem("user");
+    }
+
+    // if token provided, persist and attach to api
+    if (token) {
+      localStorage.setItem("token", token);
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
     }
   };
 

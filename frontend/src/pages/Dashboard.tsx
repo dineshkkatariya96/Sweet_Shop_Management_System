@@ -1,8 +1,8 @@
+// src/pages/Dashboard.tsx
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import axios from "axios";
-
+import api from "../services/api";
 import {
   CakeIcon,
   ShoppingCartIcon,
@@ -52,7 +52,6 @@ const ActionCard = ({
         flex flex-col justify-between h-full
       "
     >
-      {/* Background glow */}
       <div
         className={`
           absolute inset-0 opacity-0 
@@ -60,16 +59,12 @@ const ActionCard = ({
           bg-linear-to-br ${theme}
         `}
       />
-
-      {/* Badge */}
       {badge && (
         <div className="absolute top-3 right-3 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold">
           {badge}
         </div>
       )}
-
       <div className="flex flex-col gap-4 relative z-10">
-        {/* Icon Container */}
         <div className="flex items-start justify-between">
           <div
             className={`
@@ -84,14 +79,13 @@ const ActionCard = ({
         </div>
 
         <div>
-          <h3 className="text-lg font-bold text-gray-800 group-hover:text-transparent group-hover:bg-linear-to-r group-hover:from-purple-600 group-hover:to-pink-600 group-hover:bg-clip-text transition-all">
+          <h3 className="text-lg font-bold text-gray-800 transition-all">
             {title}
           </h3>
           <p className="text-gray-600 text-sm mt-2">{description}</p>
         </div>
       </div>
 
-      {/* Hover Arrow */}
       <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all transform translate-x-0 group-hover:translate-x-1">
         <span className="text-purple-600 font-bold">→</span>
       </div>
@@ -117,7 +111,7 @@ const StatCard = ({
       <div className={`p-3 rounded-lg bg-linear-to-br ${color} text-white shadow-md`}>
         {icon}
       </div>
-        <ArrowTrendingUpIcon className="h-5 w-5 text-green-500" />
+      <ArrowTrendingUpIcon className="h-5 w-5 text-green-500" />
     </div>
     <p className="text-gray-600 text-sm font-medium">{label}</p>
     <p className="text-3xl font-extrabold text-gray-900 mt-2">{value}</p>
@@ -127,74 +121,91 @@ const StatCard = ({
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [stats, setStats] = useState({ sweets: 0, orders: 0 });
+  const { user, setUser } = useAuth();
+  const [stats, setStats] = useState<{ sweets: number; orders: number }>({ sweets: 0, orders: 0 });
+  const [loading, setLoading] = useState(false);
+
+  // If user is not present, redirect to login
+  useEffect(() => {
+  if (!loading && !user) {
+    navigate("/login");
+  }
+}, [user, loading, navigate]);
+
 
   useEffect(() => {
-    if (!user) navigate("/login");
-  }, [user, navigate]);
+    // fetch only when user exists
+    if (!user) return;
 
-  useEffect(() => {
+    let cancelled = false;
+
     const fetchStats = async () => {
+      setLoading(true);
       try {
-        const token = localStorage.getItem("token");
-        const sweetsRes = await axios.get("http://localhost:3000/api/sweets", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // use your api instance (interceptor adds Authorization header)
+        const sweetsRes = await api.get("/sweets");
+        const ordersUrl = user.role === "ADMIN" ? "/admin/orders" : "/orders";
+        const ordersRes = await api.get(ordersUrl);
 
-        const ordersRes = await axios.get(
-          user?.role === "ADMIN"
-            ? "http://localhost:3000/api/admin/orders"
-            : "http://localhost:3000/api/orders",
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        setStats({
-          sweets: sweetsRes.data.sweets?.length || 0,
-          orders: ordersRes.data.orders?.length || 0,
-        });
-      } catch (err) {
-        console.error("Error fetching stats:", err);
+        if (!cancelled) {
+          setStats({
+            sweets: Array.isArray(sweetsRes.data?.sweets) ? sweetsRes.data.sweets.length : 0,
+            orders: Array.isArray(ordersRes.data?.orders) ? ordersRes.data.orders.length : 0,
+          });
+        }
+      } catch (err: any) {
+        // handle 401: clear stored auth and redirect to login
+        const status = err?.response?.status;
+        if (status === 401) {
+          console.warn("Auth error - logging out");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          setUser && setUser(null as any);
+          navigate("/login");
+        } else {
+          console.error("Error fetching stats:", err);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
 
-    if (user) {
-      fetchStats();
-    }
-  }, [user]);
+    fetchStats();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, navigate, setUser]);
 
   if (!user) return null;
 
   const isAdmin = user.role === "ADMIN";
-  const userName = user.email.split("@")[0];
+  const userName = (user.email || "").split("@")[0] || "User";
   const displayName = userName.charAt(0).toUpperCase() + userName.slice(1);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50 flex justify-center items-start py-16 px-4 pt-24">
       <div className="w-full max-w-6xl">
-        {/* HEADER */}
         <div className="glass rounded-3xl shadow-2xl border-2 border-white/40 p-8 sm:p-12 mb-8 animate-fade-in-up">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
               <SparklesIcon className="h-12 w-12 text-purple-600 animate-bounce-soft" />
             </div>
             <h1 className="text-5xl sm:text-6xl font-extrabold text-gray-900 tracking-tight mb-2">
-              Hello, <span className="text-transparent bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text">
+              Hello,{" "}
+              <span className="text-transparent bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text">
                 {displayName}
-              </span>
+              </span>{" "}
               👋
             </h1>
 
             <p className="text-gray-700 text-lg sm:text-xl mt-3 font-medium">
-              {isAdmin
-                ? "🏪 Manage your sweet shop with ease"
-                : "🍬 Explore and order your favourite sweets"}
+              {isAdmin ? "🏪 Manage your sweet shop with ease" : "🍬 Explore and order your favourite sweets"}
             </p>
           </div>
 
           <div className="border-t-2 border-gray-200" />
 
-          {/* USER INFO CARDS */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-8">
             <div className="glass rounded-xl p-4 text-center border border-white/60">
               <p className="text-gray-600 text-sm font-medium">Role</p>
@@ -204,9 +215,7 @@ export default function Dashboard() {
             </div>
             <div className="glass rounded-xl p-4 text-center border border-white/60">
               <p className="text-gray-600 text-sm font-medium">Email</p>
-              <p className="text-sm font-semibold text-gray-900 mt-2 truncate">
-                {user.email}
-              </p>
+              <p className="text-sm font-semibold text-gray-900 mt-2 truncate">{user.email}</p>
             </div>
             <div className="glass rounded-xl p-4 text-center border border-white/60 col-span-2 sm:col-span-1">
               <p className="text-gray-600 text-sm font-medium">Status</p>
@@ -217,19 +226,18 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* STATS SECTION */}
         <div className="grid sm:grid-cols-3 gap-6 mb-8">
           <StatCard
             icon={<CakeIcon className="h-6 w-6" />}
             label="Total Sweets"
-            value={stats.sweets}
+            value={loading ? "…" : stats.sweets}
             color="from-blue-500 to-blue-700"
             subtext="In our collection"
           />
           <StatCard
             icon={<ShoppingCartIcon className="h-6 w-6" />}
             label={isAdmin ? "Total Orders" : "My Orders"}
-            value={stats.orders}
+            value={loading ? "…" : stats.orders}
             color="from-purple-500 to-purple-700"
             subtext={isAdmin ? "From all customers" : "Your purchases"}
           />
@@ -242,7 +250,6 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* ACTION CARDS */}
         <div className="glass rounded-3xl shadow-2xl border-2 border-white/40 p-8 sm:p-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-2">
             <SparklesIcon className="h-6 w-6 text-purple-600" />
@@ -250,7 +257,6 @@ export default function Dashboard() {
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-            {/* Browse Sweets - All Users */}
             <ActionCard
               to="/sweets"
               icon={<CakeIcon className="h-7 w-7" />}
@@ -260,7 +266,6 @@ export default function Dashboard() {
               badge="Popular"
             />
 
-            {/* Customer-Only Card */}
             {!isAdmin && (
               <ActionCard
                 to="/orders"
@@ -271,7 +276,6 @@ export default function Dashboard() {
               />
             )}
 
-            {/* Admin-Only Cards */}
             {isAdmin && (
               <>
                 <ActionCard
@@ -294,12 +298,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* WELCOME MESSAGE */}
         <div className="glass rounded-3xl shadow-2xl border-2 border-white/40 p-8 mt-8 text-center animate-fade-in-up">
           <p className="text-gray-700 font-medium mb-2">
-            {isAdmin
-              ? "👨‍💼 Welcome to your admin dashboard!"
-              : "🍬 Ready to explore delicious sweets?"}
+            {isAdmin ? "👨‍💼 Welcome to your admin dashboard!" : "🍬 Ready to explore delicious sweets?"}
           </p>
           <p className="text-gray-600 text-sm">
             {isAdmin
