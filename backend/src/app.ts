@@ -15,9 +15,9 @@ const app = express();
 // CORS
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://sweet-shop-management-system-aqbt.vercel.app",
-  "https://sweet-shop-management-system-aqbt-1qniasq9r.vercel.app",
-  "https://sweet-shop-management-system-beta.vercel.app",
+  "https://sweet-shop-management-system-b1mw.vercel.app",
+  "https://sweet-shop-management-sy-git-de367d-dineshkkatariya96s-projects.vercel.app",
+  "https://sweet-shop-management-system-b1mw-2b47l3nll.vercel.app/",
 ];
 
 app.use(
